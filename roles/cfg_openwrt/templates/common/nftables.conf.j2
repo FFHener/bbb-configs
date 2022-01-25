@@ -1,0 +1,94 @@
+#jinja2: trim_blocks: "true", lstrip_blocks: "true"
+#!/usr/sbin/nft -f
+{% set profile = wireless_profiles | selectattr('name', 'equalto', wireless_profile) | list | first -%}
+
+{# DISCLAIMER: i'm not very proud of the following. feel free to find more elegant way!
+   Basically we need a list of dicts which can be used later on.
+network_ifname_map =
+  - network: dhcp
+    ifname: wlan5-dhcp
+  - ..
+#}
+{% set network_ifname_map = [] %}
+{% for wd in wireless_devices | default([]) %}
+  {% set wd_config = profile['devices'] | selectattr('radio', 'contains', wd['name']) | first %}
+  {% set wd_ifaces = profile['ifaces'] | default([]) | selectattr('radio', 'contains', wd['name']) %}
+  {% if not wd_config.get('disabled') %}
+    {% for iface in wd_ifaces %}
+      {% set ifname = wd['ifname_hint'] + '-' + iface['ifname_hint']|default('if' + loop.index0|string) %}
+      {% if iface['mode'] == 'ap' %}
+        {{ network_ifname_map.append({'network': iface['network'], 'ifname': ifname })}}
+      {% elif iface['mode'] == 'mesh' %}
+        {% set mesh_nets = networks | selectattr('role','defined') | selectattr('role','equalto','mesh')
+          | selectattr('mesh_ap','defined') | selectattr('mesh_ap','equalto',inventory_hostname)
+          | selectattr('mesh_radio','equalto', wd['name']) | selectattr('mesh_iface','equalto',iface['ifname_hint']) %}
+        {% if mesh_nets | length > 0 %}
+          {{ network_ifname_map.append({'network': (mesh_nets|first)['name'], 'ifname': ifname })}}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+{# DISCLAIMER SCOPE END #}
+
+{% for network in networks | selectattr('enforce_client_isolation', 'defined') | selectattr('enforce_client_isolation') %}
+  {% set name = network['name'] if 'name' in network else network['role'] %}
+  {% set wifi_ifnames = network_ifname_map | selectattr('network', 'equalto', name) | map(attribute='ifname') %}
+  {% if wifi_ifnames|length > 0 %}
+    {% set wifi = '{ ' + wifi_ifnames | join(', ') + '}' %}
+    {% set uplink = (('switch0' if dsa_ports is defined else int_port) + '.' + network['vid']|string) if role == 'ap' else '!= ' + wifi %}
+    {% if loop.first %}
+define gw = 02:00:00:00:00:01
+define bc = ff:ff:ff:ff:ff:ff
+define mc6 = 33:33:00:00:00:00/16
+
+table bridge client_isolation
+flush table bridge client_isolation
+table bridge client_isolation {
+    {% endif %}
+	chain PREROUTING_{{ name }} {
+		type filter hook prerouting priority 0; policy accept;
+		iif {{ uplink }} accept
+		iif {{ wifi }} ether daddr $bc ether daddr set $gw
+		iif {{ wifi }} ether daddr $mc6 ether daddr set $gw
+		iif {{ wifi }} ether daddr $gw accept
+		iif {{ wifi }} drop
+	}
+    {% if loop.last %}
+}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{% for network in networks | selectattr('role', 'equalto', 'mesh') | selectattr('name','in', network_ifname_map|map(attribute='network')) %}
+  {% set wifi_if = network_ifname_map | selectattr('network', 'equalto', network['name']) | map(attribute='ifname') | first %}
+  {% set set_localrouter = 'localrouter_' + network['name'] %}
+  {% if loop.first %}
+
+{# Corerouters have no bridge, therefore we need to hook in family inet.
+    See https://wiki.nftables.org/wiki-nftables/index.php/Netfilter_hooks#Netfilter_hooks_into_Linux_networking_packet_flows #}
+{% set type = 'bridge' if role == 'ap' else 'inet' %}
+
+
+table {{ type }} prevent_mesh_reflection
+flush table {{ type }} prevent_mesh_reflection
+table {{ type }} prevent_mesh_reflection {
+  {% endif %}
+	set {{ set_localrouter }} {
+		type ether_addr
+		size 5
+		flags timeout
+	}
+	chain POSTROUTING_{{ network['name'] }} {
+		type filter hook postrouting priority 0; policy accept;
+		oif {{ wifi_if }} update @{{ set_localrouter }} { ether saddr timeout 1h }
+	}
+	chain PREROUTING_{{ network['name'] }} {
+		type filter hook prerouting priority 0; policy accept;
+		iif {{ wifi_if }} ether saddr @{{ set_localrouter }} counter drop
+
+	}
+  {% if loop.last %}
+}
+  {% endif %}
+{% endfor %}

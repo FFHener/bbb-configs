@@ -22,7 +22,7 @@ ntp_servers:
 collectd_host: monitor.berlin.freifunk.net
 collectd_ping_host: 1.1.1.1
 
-feed: "src/gz openwrt_falter https://buildbot.berlin.freifunk.net/buildbot/feed/__FEED_VERSION__/packages/__INSTR_SET__/falter"
+feed: "src/gz openwrt_falter https://firmware.berlin.freifunk.net/feed/__FEED_VERSION__/packages/__INSTR_SET__/falter"
 
 # Preserve following files (allow list)
 sysupgrade_preserve_custom_files:
@@ -46,3 +46,5 @@ all_sysctl__to_merge:
 
   # especially on low mem devices this is important
   vm.min_free_kbytes: 1024
+
+compat_version: 1.0
