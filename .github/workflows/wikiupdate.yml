@@ -30,7 +30,7 @@ jobs:
         run: |
           if [ -n "${CHANGED_LOCATIONS}" ]; then
             ansible-playbook play.yml --tags wiki --limit "$CHANGED_LOCATIONS"
+            continue-on-error: true
           else
             echo "No locations were changed. Skipping update"
           fi
-          continue-on-error: true
