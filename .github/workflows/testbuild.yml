@@ -6,7 +6,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - main  # Replace with your default branch if different
+      - master  # Replace with your default branch if different
 
 jobs:
   post-merge-diff:
@@ -14,7 +14,7 @@ jobs:
     if: github.event.pull_request.merged == true
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.base.ref }} # Check out the base branch
 
@@ -22,76 +22,3 @@ jobs:
         run: |
           git fetch origin +${{ github.event.pull_request.head.ref }}:${{ github.event.pull_request.head.ref }} # Fetch the feature branch
           git diff ${{ github.event.pull_request.base.ref }}..${{ github.event.pull_request.head.ref }} # Compare the branches
-
-# name: Test Build
-# on:
-#   pull_request:
-#     branches:
-#       - master
-#     types:
-#       - opened
-#       - reopened
-#       - closed
-#       - synchronize
-
-# jobs:
-#   build:
-#     name: Ansible Test Build
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0
-
-#       # - name: Install dependencies
-#       #   run: sudo apt install python3
-
-#       # - name: Install dependencies
-#       #   run: pip3 install -r requirements.txt --upgrade pip
-
-#       - name: Determine branch name
-#         run: |
-#           echo "GITHUB_BASE_REF is $GITHUB_BASE_REF"
-#           echo "GITHUB_HEAD_REF is $GITHUB_HEAD_REF"
-#           PR_MERGED=${{ github.event.pull_request.merged }}
-#           echo "PR_MERGED is $PR_MERGED"
-#           BRANCH="${GITHUB_BASE_REF#refs/heads/}"
-#           if [[ "$PR_MERGED" == "true" ]]; then
-#             BRANCH=$GITHUB_HEAD_REF
-#           fi
-#           echo "Building for $BRANCH"
-#           echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
-#       - name: Determine changed locations
-#         run: |
-#           DEBUG_GIT_STATUS=$(git status)
-#           echo "git status is $DEBUG_GIT_STATUS"
-#           DEBUG_REMOTE_SHOW=$(git remote show origin)
-#           echo "git remote show origin is $DEBUG_REMOTE_SHOW"
-#           DEBUG_GIT_DIFF=$(git diff "origin/$BRANCH")
-#           echo "git diff is: $DEBUG_GIT_DIFF"
-#           CHANGED_SINGE_FILE_LOCATIONS=$(git diff --diff-filter=d --name-only "origin/$BRANCH" | grep 'locations/' | sed 's/locations\/\(.*\)\.yml/location_\1/' | sed -z 's/-/_/g;s/\n/,/g;s/,$//')
-#           CHANGED_LOCATIONS=$CHANGED_SINGE_FILE_LOCATIONS
-#           echo "Building for changed locations: $CHANGED_LOCATIONS"
-#           echo "CHANGED_LOCATIONS=$CHANGED_LOCATIONS" >> "$GITHUB_ENV"
-
-#       # - if: github.event.pull_request.state == 'open'
-#       #   name: Build changed locations
-#       #   run: |
-#       #     if [ -n "${CHANGED_HOSTS}" ] || [ -n "${CHANGED_LOCATIONS}" ] ; then
-#       #       ansible-playbook play.yml --limit "${CHANGED_HOSTS:+$CHANGED_HOSTS,}$CHANGED_LOCATIONS"
-#       #     fi
-#       #     mkdir -p ./tmp/images
-
-#       # - if: github.event.pull_request.merged == true
-#       #   name: Update wiki.freifunk.net
-#       #   run: |
-#       #     ansible-playbook play.yml --tags wiki --limit "${CHANGED_HOSTS:+$CHANGED_HOSTS,}$CHANGED_LOCATIONS"
-#       #   continue-on-error: true
-
-#       # - if: github.event.pull_request.state == 'open'
-#       #   name: Store build output
-#       #   uses: actions/upload-artifact@v1
-#       #   with:
-#       #     name: ansibleimages
-#       #     path: ./tmp/images
