@@ -42,9 +42,11 @@ jobs:
         run: |
           DEBUG_GIT_STATUS=$(git status)
           echo "git status is $DEBUG_GIT_STATUS"
-          DEBUG_GIT_DIFF=$(git diff "$BRANCH")
+          DEBUG_REMOTE_SHOW=$(git remote show origin)
+          echo "git remote show origin is $DEBUG_REMOTE_SHOW"
+          DEBUG_GIT_DIFF=$(git diff "origin/$BRANCH")
           echo "git diff is: $DEBUG_GIT_DIFF"
-          CHANGED_SINGE_FILE_LOCATIONS=$(git diff --diff-filter=d --name-only "$BRANCH" | grep 'locations/' | sed 's/locations\/\(.*\)\.yml/location_\1/' | sed -z 's/-/_/g;s/\n/,/g;s/,$//')
+          CHANGED_SINGE_FILE_LOCATIONS=$(git diff --diff-filter=d --name-only "origin/$BRANCH" | grep 'locations/' | sed 's/locations\/\(.*\)\.yml/location_\1/' | sed -z 's/-/_/g;s/\n/,/g;s/,$//')
           CHANGED_LOCATIONS=$CHANGED_SINGE_FILE_LOCATIONS
           echo "Building for changed locations: $CHANGED_LOCATIONS"
           echo "CHANGED_LOCATIONS=$CHANGED_LOCATIONS" >> "$GITHUB_ENV"
