@@ -72,4 +72,3 @@ jobs:
       #   with:
       #     name: ansibleimages
       #     path: ./tmp/images
-      - if: github.event.pull_request.merged
