@@ -28,7 +28,11 @@ jobs:
 
       - name: Determine branch name
         run: |
-          BRANCH="${GITHUB_REF_NAME#refs/heads/}"
+          echo "GITHUB_BASE_REF is $GITHUB_BASE_REF"
+          echo "GITHUB_REF is $GITHUB_REF"
+          echo "GITHUB_REF_NAME is $GITHUB_REF_NAME"
+          echo "GITHUB_REF is $GITHUB_REF"
+          BRANCH="${GITHUB_BASE_REF#refs/heads/}"
           echo "Building for $BRANCH"
           echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
 
