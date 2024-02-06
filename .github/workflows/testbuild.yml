@@ -1,6 +1,10 @@
 ---
 name: Test Build
 on:
+  push:
+    branches:
+      - master
+      - testbuild-wikiupdater
   pull_request:
     branches:
       - master
@@ -33,6 +37,9 @@ jobs:
           echo "GITHUB_REF_NAME is $GITHUB_REF_NAME"
           echo "GITHUB_HEAD_REF is $GITHUB_HEAD_REF"
           BRANCH="${GITHUB_BASE_REF#refs/heads/}"
+          if "$github.event.pull_request.merged"; then
+            BRANCH=$GITHUB_HEAD_REF
+          fi
           echo "Building for $BRANCH"
           echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
 
@@ -65,3 +72,4 @@ jobs:
       #   with:
       #     name: ansibleimages
       #     path: ./tmp/images
+      - if: github.event.pull_request.merged
