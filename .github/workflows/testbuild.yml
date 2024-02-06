@@ -20,18 +20,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install dependencies
-        run: sudo apt install python3
+      # - name: Install dependencies
+      #   run: sudo apt install python3
 
-      - name: Install dependencies
-        run: pip3 install -r requirements.txt --upgrade pip
+      # - name: Install dependencies
+      #   run: pip3 install -r requirements.txt --upgrade pip
 
       - name: Determine branch name
         run: |
           echo "GITHUB_BASE_REF is $GITHUB_BASE_REF"
           echo "GITHUB_REF is $GITHUB_REF"
           echo "GITHUB_REF_NAME is $GITHUB_REF_NAME"
-          echo "GITHUB_REF is $GITHUB_REF"
+          echo "GITHUB_HEAD_REF is $GITHUB_HEAD_REF"
           BRANCH="${GITHUB_BASE_REF#refs/heads/}"
           echo "Building for $BRANCH"
           echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
@@ -45,23 +45,23 @@ jobs:
           echo "Building for changed locations: $CHANGED_LOCATIONS"
           echo "CHANGED_LOCATIONS=$CHANGED_LOCATIONS" >> "$GITHUB_ENV"
 
-      - if: github.event.pull_request.state == 'open'
-        name: Build changed locations
-        run: |
-          if [ -n "${CHANGED_HOSTS}" ] || [ -n "${CHANGED_LOCATIONS}" ] ; then
-            ansible-playbook play.yml --limit "${CHANGED_HOSTS:+$CHANGED_HOSTS,}$CHANGED_LOCATIONS"
-          fi
-          mkdir -p ./tmp/images
+      # - if: github.event.pull_request.state == 'open'
+      #   name: Build changed locations
+      #   run: |
+      #     if [ -n "${CHANGED_HOSTS}" ] || [ -n "${CHANGED_LOCATIONS}" ] ; then
+      #       ansible-playbook play.yml --limit "${CHANGED_HOSTS:+$CHANGED_HOSTS,}$CHANGED_LOCATIONS"
+      #     fi
+      #     mkdir -p ./tmp/images
 
-      - if: github.event.pull_request.merged == true
-        name: Update wiki.freifunk.net
-        run: |
-          ansible-playbook play.yml --tags wiki --limit "${CHANGED_HOSTS:+$CHANGED_HOSTS,}$CHANGED_LOCATIONS"
-        continue-on-error: true
+      # - if: github.event.pull_request.merged == true
+      #   name: Update wiki.freifunk.net
+      #   run: |
+      #     ansible-playbook play.yml --tags wiki --limit "${CHANGED_HOSTS:+$CHANGED_HOSTS,}$CHANGED_LOCATIONS"
+      #   continue-on-error: true
 
-      - if: github.event.pull_request.state == 'open'
-        name: Store build output
-        uses: actions/upload-artifact@v1
-        with:
-          name: ansibleimages
-          path: ./tmp/images
+      # - if: github.event.pull_request.state == 'open'
+      #   name: Store build output
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: ansibleimages
+      #     path: ./tmp/images
