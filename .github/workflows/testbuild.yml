@@ -1,24 +1,21 @@
 ---
+  name: Post-Merge Diff
 
-name: Post Merge Diff
+  on:
+    push:
+      branches:
+        - master
 
-on:
-  pull_request:
-    types: [closed]
-    branches:
-      - master  # Replace with your default branch if different
+  jobs:
+    compare-changes:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v3
+          with:
+            fetch-depth:  0  # Fetch all history for all branches and tags
 
-jobs:
-  post-merge-diff:
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.base.ref }} # Check out the base branch
-
-      - name: Print git diff
-        run: |
-          git fetch origin +${{ github.event.pull_request.head.ref }}:${{ github.event.pull_request.head.ref }} # Fetch the feature branch
-          git diff ${{ github.event.pull_request.base.ref }}..${{ github.event.pull_request.head.ref }} # Compare the branches
+        - name: Compare feature branch with main before merge
+          run: |
+            git diff ${{ github.event.before }}..${{ github.event.after }} > diff.txt
+            cat diff.txt
