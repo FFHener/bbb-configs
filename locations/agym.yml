@@ -1,5 +1,4 @@
 ---
-
 location: agym
 location_nice: Andreas Gymnasium
 latitude: 52.514169
@@ -8,7 +7,6 @@ altitude: 67
 community: true
 
 hosts:
-
   - hostname: agym-core
     role: corerouter
     model: "tplink_tl-wdr4900-v1"
