@@ -1,0 +1,27 @@
+---
+name: Wikiupdate
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth:  0
+
+    - name: Determine changed locations
+      run: |
+        CHANGED_LOCATIONS=$(git diff ${{ github.event.before }}..${{ github.event.after }} --diff-filter=d --name-only | grep 'locations/' | sed 's/locations\/\(.*\)\.yml/location_\1/' | sed -z 's/-/_/g;s/\n/,/g;s/,$//')
+        echo "Updating for changed locations: $CHANGED_LOCATIONS"
+        echo "CHANGED_LOCATIONS=$CHANGED_LOCATIONS" >> "$GITHUB_ENV"
+
+    - name: Update wiki.freifunk.net
+      run: |
+        ansible-playbook play.yml --tags wiki --limit "$CHANGED_LOCATIONS"
+        continue-on-error: true
