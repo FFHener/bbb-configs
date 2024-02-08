@@ -53,7 +53,10 @@ jobs:
           mkdir -p ./tmp/images
 
       - name: Store build output
-        uses: actions/upload-artifact@v1
-        with:
-          name: ansibleconfigs
-          path: ./tmp/config
+        run: |
+          FOLDER=$( ls -al )
+          echo " the current folder contains: $FOLDER"
+        # uses: actions/upload-artifact@v1
+        # with:
+        #   name: ansibleconfigs
+        #   path: ./tmp/config
