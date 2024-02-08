@@ -53,6 +53,7 @@ jobs:
           mkdir -p ./tmp/images
 
       - name: Store build output
+        if: env.CHANGED_HOSTS != '' || env.CHANGED_LOCATIONS != ''
         uses: actions/upload-artifact@v1
         with:
           name: ansibleconfigs
