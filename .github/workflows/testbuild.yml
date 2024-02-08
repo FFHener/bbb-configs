@@ -55,5 +55,5 @@ jobs:
       - name: Store build output
         uses: actions/upload-artifact@v1
         with:
-          name: ansibleimages
-          path: ./tmp/images
+          name: ansibleconfigs
+          path: /tmp/config
