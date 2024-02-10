@@ -6,7 +6,7 @@ on:  # yamllint disable-line rule:truthy
       - master
 
 jobs:
-  update:
+  update_wiki:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -29,7 +29,6 @@ jobs:
       - name: Debug environment variables
         run: |
           echo "FF_WIKI_USER=${{ env.FF_WIKI_USER }}"
-          echo "FF_WIKI_PASSWORD=${{ secrets.FF_WIKI_PASSWORD }}"
 
       - name: Update wiki.freifunk.net
         env:
