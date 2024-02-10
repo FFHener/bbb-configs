@@ -24,7 +24,7 @@ if not os.getenv("FF_WIKI_USER") or not os.getenv("FF_WIKI_PASSWORD"):
     raise FileNotFoundError(
         (
             "Environment variables FF_WIKI_USER and FF_WIKI_PASSWORD are not set. "
-            "Please ensure they are set in the GitHub secrets or in your local .env file."
+            "Please ensure they are set in the GitHub Settings or in your local .env file."
         )
     )
 
