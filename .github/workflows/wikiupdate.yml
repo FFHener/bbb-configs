@@ -26,6 +26,11 @@ jobs:
             echo "Updating for changed locations: $CHANGED_LOCATIONS"
             echo "CHANGED_LOCATIONS=$CHANGED_LOCATIONS" >> "$GITHUB_ENV"
 
+      - name: Debug environment variables
+        run: |
+          echo "FF_WIKI_USER=${{ env.FF_WIKI_USER }}"
+          echo "FF_WIKI_PASSWORD=${{ secrets.FF_WIKI_PASSWORD }}"
+
       - name: Update wiki.freifunk.net
         env:
           FF_WIKI_USER: ${{ env.FF_WIKI_USER }}
