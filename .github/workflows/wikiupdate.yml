@@ -30,7 +30,7 @@ jobs:
       - name: Debug environment variables
         run: |
           echo "Secret=${{ secrets.FF_WIKI_PASSWORD }}"
-          echo "Var=${{ vars.FF_WIKI_USER }}""
+          echo "Var=${{ vars.FF_WIKI_USER }}"
 
       # - name: Update wiki.freifunk.net
       #   env:
