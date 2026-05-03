@@ -88,3 +88,9 @@ jobs:
           name: ansibleimages
           path: |
             ./tmp/images.tar
+
+      - name: Comment link to artifacts
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Building images because you added the label `build_image`. You can find the output [here](${{ steps.artifact-upload-step.outputs.artifact-url }}). If you need to build the images again just add the label again.
