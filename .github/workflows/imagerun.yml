@@ -83,6 +83,7 @@ jobs:
           tar -cvf ./tmp/images.tar ./tmp/images/
 
       - name: Store build output
+        id: artifact-upload-step
         uses: actions/upload-artifact@v5
         with:
           name: ansibleimages
